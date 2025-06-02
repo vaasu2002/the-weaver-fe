@@ -1,14 +1,9 @@
 import React, { useState, useCallback, useMemo, type JSX } from 'react';
 import { Send, X, Plus, Sparkles, Code, Target, Zap, CheckCircle, AlertCircle } from 'lucide-react';
+import UnderConstructionModal from './components/UnderConstructionModal'
 
 interface ValidationErrors {
   [key: string]: string;
-}
-
-interface SubmissionData {
-  projectTitle: string;
-  projectDescription: string;
-  requirements: string[];
 }
 
 const App: React.FC = () => {
@@ -21,8 +16,8 @@ const App: React.FC = () => {
     'Build a notification system with configurable alerts for threshold breaches, goal achievements, and compliance monitoring, including email, SMS, and in-app notifications with escalation workflows.',
     'Design a scalable cloud infrastructure with secure data storage, API endpoints for third-party integrations, user authentication, role-based access control, and support for multi-tenant architecture.'
   ]);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   const addRequirement = useCallback((): void => {
     setRequirements(prev => [...prev, '']);
@@ -88,30 +83,9 @@ const App: React.FC = () => {
       return;
     }
     
-    setIsSubmitting(true);
-    
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const submissionData: SubmissionData = {
-        projectTitle: projectTitle.trim(),
-        projectDescription: projectDescription.trim(),
-        requirements: requirements.filter(req => req.trim() !== '').map(req => req.trim())
-      };
-      
-      console.log('Successfully submitted requirements:', submissionData);
-      
-      // Here you would typically navigate to the next page or show a success message
-      alert('Requirements submitted successfully!');
-      
-    } catch (error) {
-      console.error('Submission failed:', error);
-      alert('Failed to submit requirements. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [projectTitle, projectDescription, requirements, validateForm]);
+    // Show the under construction modal instead of processing
+    setShowModal(true);
+  }, [validateForm]);
 
   const completionPercentage = useMemo((): number => {
     const titleComplete = projectTitle.trim() ? 1 : 0;
@@ -322,10 +296,10 @@ const App: React.FC = () => {
           <div className="pt-6">
             <button
               onClick={handleSubmit}
-              disabled={!isFormValid || isSubmitting}
+              disabled={!isFormValid}
               className="w-full py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white font-bold text-lg rounded-2xl hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             >
-              {isSubmitting ? (
+              {showModal ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3"></div>
                   Processing Requirements...
@@ -378,6 +352,10 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
+        <UnderConstructionModal 
+          isOpen={showModal} 
+          onClose={() => setShowModal(false)} 
+        />
       </div>
     </div>
   );
